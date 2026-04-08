@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Asignador de proyectos</title>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap");
+
+      body {
+        font-family: "Space Grotesk", sans-serif;
+        font-optical-sizing: auto;
+        padding: 20px;
+      }
+
+      table {
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 10px 14px;
+        text-align: left;
+        min-width: 220px;
+      }
+
+      th {
+        background-color: #f0f0f0;
+      }
+
+      tr {
+        transition: background 0.3s;
+      }
+
+      tr.nueva {
+        background-color: #ffffcc;
+      }
+
+      button,
+      .custom-file {
+        font-family: "Space Grotesk", sans-serif;
+        font-optical-sizing: auto;
+
+        display: inline-block;
+        padding: 10px 16px;
+
+        background: black;
+        color: white;
+
+        border: none;
+        border-radius: 6px;
+
+        cursor: pointer;
+        margin-right: 10px;
+
+        font-size: 16px;
+      }
+
+      button:hover,
+      .custom-file:hover {
+        background: #333;
+      }
+
+      .custom-file input {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Asignar géneros y formatos</h2>
+
+    <label class="custom-file">
+      Subir CSV
+      <input
+        type="file"
+        id="fileInput"
+        accept=".csv"
+        onchange="mostrarNombre(this)"
+      />
+    </label>
+
+    <span id="nombreArchivo"></span>
+    <button onclick="procesar()">Procesar</button>
+
+    <table id="tabla">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Género</th>
+          <th>Formato</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      function mostrarNombre(input) {
+        const nombre = input.files[0]?.name || "";
+        document.getElementById("nombreArchivo").textContent = nombre;
+      }
+
+      const formatos = [
+        "Video (para YouTube)",
+        "Sonido (para Spotify)",
+        "Carrusel (para Instagram)",
+      ];
+
+      const generos = [
+        "Entrevista tipo perfil",
+        "Crónica",
+        "Chisme",
+      ];
+
+      function randomItem(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      function procesar() {
+        const file = document.getElementById("fileInput").files[0];
+        if (!file) return alert("Sube un archivo CSV");
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+          const texto = e.target.result;
+          const filas = texto.split("\n");
+
+          let resultado = [];
+
+          filas.forEach((fila, i) => {
+            if (i === 0) return; // 🚫 ignorar encabezado
+
+            let nombre = fila.trim();
+
+            if (nombre !== "") {
+
+              // 🔄 reorganizar si viene como "Apellido, Nombre"
+              if (nombre.includes(",")) {
+                const partes = nombre.split(",");
+
+                nombre =
+                  partes
+                    .slice(1)
+                    .join(" ")
+                    .trim() +
+                  " " +
+                  partes[0].trim();
+              }
+
+              resultado.push({
+                nombre,
+                genero: randomItem(generos),
+                formato: randomItem(formatos),
+              });
+            }
+          });
+
+          mostrarSecuencial(resultado);
+        };
+
+        reader.readAsText(file);
+      }
+
+      function mostrarSecuencial(data) {
+        const tbody = document.querySelector("#tabla tbody");
+        tbody.innerHTML = "";
+
+        let i = 0;
+
+        function mostrarFila() {
+          if (i >= data.length) return;
+
+          const d = data[i];
+
+          const tr = document.createElement("tr");
+          tr.classList.add("nueva");
+
+          const tdNombre = document.createElement("td");
+          const tdGenero = document.createElement("td");
+          const tdFormato = document.createElement("td");
+
+          tdNombre.textContent = d.nombre;
+          tdGenero.textContent = "";
+          tdFormato.textContent = "";
+
+          tr.appendChild(tdNombre);
+          tr.appendChild(tdGenero);
+          tr.appendChild(tdFormato);
+
+          tbody.appendChild(tr);
+
+          // quitar highlight
+          setTimeout(() => {
+            tr.classList.remove("nueva");
+          }, 800);
+
+          // 🎬 aparición progresiva
+          setTimeout(() => {
+            tdGenero.textContent = d.genero;
+          }, 700);
+
+          setTimeout(() => {
+            tdFormato.textContent = d.formato;
+          }, 1400);
+
+          i++;
+
+          setTimeout(mostrarFila, 1800);
+        }
+
+        mostrarFila();
+      }
+    </script>
+  </body>
+</html>
