@@ -4,15 +4,16 @@
     <meta charset="UTF-8" />
     <title>Asignador de proyectos</title>
 
+    <!-- PDF libs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap");
-      @import url('https://fonts.googleapis.com/css2?family=Barrio&family=Space+Grotesk:wght@300..700&display=swap');
-      @import url('https://fonts.googleapis.com/css2?family=Barrio&family=Space+Grotesk:wght@300..700&family=Syne:wght@400..800&display=swap');
+      @import url("https://fonts.googleapis.com/css2?family=Barrio&family=Space+Grotesk:wght@300..700&family=Syne:wght@400..800&display=swap");
 
       body {
-        font-family: "Space Grotesk", sans-serif;
-         font-family: "Syne", sans-serif;
-        font-optical-sizing: auto;
+        font-family: "Syne", sans-serif;
         padding: 20px;
       }
 
@@ -33,10 +34,6 @@
         background-color: #f0f0f0;
       }
 
-      tr {
-        transition: background 0.3s;
-      }
-
       tr.nueva {
         background-color: rgb(140, 158, 255);
         color: white;
@@ -46,22 +43,14 @@
 
       button,
       .custom-file {
-        font-family: "Space Grotesk", sans-serif;
-        font-optical-sizing: auto;
-
+        font-family: "Syne", sans-serif;
         display: inline-block;
         padding: 10px 16px;
-
         background: rgb(214, 247, 76);
-        
-        color: rgb(0, 0, 0);
-
         border: none;
         border-radius: 6px;
-
         cursor: pointer;
         margin-right: 10px;
-
         font-size: 16px;
       }
 
@@ -74,15 +63,13 @@
         display: none;
       }
 
-      h2{
+      h2 {
         font-family: "Barrio", system-ui;
         font-size: 100px;
-        display: block;
         color: rgb(240, 96, 56);
-   
       }
 
-      #contenedor{
+      #contenedor {
         margin-left: 50%;
         transform: translateX(-50%);
       }
@@ -90,32 +77,29 @@
   </head>
 
   <body>
-    <div id ="contenedor">
-    <h2>PA' QUE TE NARRES</h2>
+    <div id="contenedor">
+      <h2>PA' QUE TE NARRES</h2>
 
-    <label class="custom-file">
-      Subir CSV
-      <input
-        type="file"
-        id="fileInput"
-        accept=".csv"
-        onchange="mostrarNombre(this)"
-      />
-    </label>
+      <label class="custom-file">
+        Subir CSV
+        <input type="file" id="fileInput" accept=".csv" onchange="mostrarNombre(this)" />
+      </label>
 
-    <span id="nombreArchivo"></span>
-    <button onclick="procesar()">Procesar</button>
+      <span id="nombreArchivo"></span>
 
-    <table id="tabla">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Género</th>
-          <th>Formato</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+      <button onclick="procesar()">Procesar</button>
+      <button onclick="exportarTablaPDF()">Exportar PDF</button>
+
+      <table id="tabla">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Género</th>
+            <th>Formato</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
 
     <script>
@@ -153,21 +137,15 @@
           let resultado = [];
 
           filas.forEach((fila, i) => {
-            if (i === 0) return; // 🚫 ignorar encabezado
+            if (i === 0) return;
 
             let nombre = fila.trim();
 
             if (nombre !== "") {
-
-              // 🔄 reorganizar si viene como "Apellido, Nombre"
               if (nombre.includes(",")) {
                 const partes = nombre.split(",");
-
                 nombre =
-                  partes
-                    .slice(1)
-                    .join(" ")
-                    .trim() +
+                  partes.slice(1).join(" ").trim() +
                   " " +
                   partes[0].trim();
               }
@@ -214,12 +192,12 @@
 
           tbody.appendChild(tr);
 
-          // quitar highlight
+          tr.scrollIntoView({ behavior: "smooth", block: "end" });
+
           setTimeout(() => {
             tr.classList.remove("nueva");
           }, 4500);
 
-          // 🎬 aparición progresiva
           setTimeout(() => {
             tdGenero.textContent = d.genero;
           }, 2000);
@@ -229,11 +207,38 @@
           }, 3000);
 
           i++;
-
           setTimeout(mostrarFila, 4000);
         }
 
         mostrarFila();
+      }
+
+      // 📄 EXPORTAR PDF LIMPIO
+      function exportarTablaPDF() {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+
+        const filas = [];
+
+        document.querySelectorAll("#tabla tbody tr").forEach(tr => {
+          const celdas = tr.querySelectorAll("td");
+
+          filas.push([
+            celdas[0]?.textContent || "",
+            celdas[1]?.textContent || "",
+            celdas[2]?.textContent || ""
+          ]);
+        });
+
+        pdf.text("Resultado", 14, 15);
+
+        pdf.autoTable({
+          head: [["Nombre", "Género", "Formato"]],
+          body: filas,
+          startY: 20
+        });
+
+        pdf.save("tabla.pdf");
       }
     </script>
   </body>
