@@ -6,7 +6,7 @@
 
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap");
-
+      @import url('https://fonts.googleapis.com/css2?family=Barrio&family=Space+Grotesk:wght@300..700&display=swap');
       body {
         font-family: "Space Grotesk", sans-serif;
         font-optical-sizing: auto;
@@ -68,11 +68,24 @@
       .custom-file input {
         display: none;
       }
+
+      h2{
+        font-family: "Barrio", system-ui;
+        font-size: 100px;
+        display: block;
+   
+      }
+
+      #contenedor{
+        margin-left: 50%;
+        transform: translateX(-50%);
+      }
     </style>
   </head>
 
   <body>
-    <h2>Asignar géneros y formatos</h2>
+    <div id ="contenedor">
+    <h2>PA' QUE TE NARRES</h2>
 
     <label class="custom-file">
       Subir CSV
@@ -97,6 +110,7 @@
       </thead>
       <tbody></tbody>
     </table>
+    </div>
 
     <script>
       function mostrarNombre(input) {
